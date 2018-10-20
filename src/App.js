@@ -1,13 +1,23 @@
 import React, { Component } from 'react';
+import kbpgp from 'kbpgp';
 
 class App extends Component {
   constructor(props) {
     super(props);
 
-    this.state = {secretName: '', rawSecret: '', encryptedSecret: '', invalidSecret: false};
-
     this.inputChanged = this.inputChanged.bind(this);
+    this.fetchRecipients = this.fetchRecipients.bind(this);
     this.encrypt = this.encrypt.bind(this);
+
+    this.recipients = [];
+    this.fetchRecipients();
+
+    this.state = {
+      secretName: '',
+      rawSecret: '',
+      encryptedSecret: '',
+      invalidSecret: false
+    };
   }
 
   inputChanged(event) {
@@ -15,29 +25,49 @@ class App extends Component {
     this.setState({[name]: event.target.value});
   }
 
+  fetchRecipients() {
+    fetch('/recipients.json')
+      .then(response => response.json())
+      .then(data => {
+        data.forEach(key => {
+          kbpgp.KeyManager.import_from_armored_pgp({armored: key}, (err, key) => {
+            if (!err) {
+              this.recipients.push(key);
+            } else {
+              console.log(err);
+            }
+          });
+        });
+      });
+  }
+
   encrypt(event) {
     if (this.state.rawSecret.trim()) {
-      this.setState({encryptedSecret: 'hQIOA/tDKQAzMPWFEAgAqM1k1DSJKI3JdSAG8Mhn/SdlRLtNxtfcJJL26nDSBrrr'})
+      this.setState({invalidSecret: false})
+
+      kbpgp.box({msg: this.state.rawSecret, encrypt_for: this.recipients}, (err, result, buffer) => {
+        this.setState({encryptedSecret: result});
+      });
     } else {
       this.setState({invalidSecret: true})
     }
   }
 
   render() {
-      if (this.state.encryptedSecret) {
-        return <EncryptedSecret
-                secretName={this.state.secretName}
-                encryptedSecret={this.state.encryptedSecret}
-               />
-      } else {
-        return <RawSecret
-                secretName={this.state.secretName}
-                rawSecret={this.state.rawSecret}
-                invalidSecret={this.state.invalidSecret}
-                inputChanged={this.inputChanged}
-                encrypt={this.encrypt}
-              />
-      }
+    if (this.state.encryptedSecret) {
+      return <EncryptedSecret
+              secretName={this.state.secretName}
+              encryptedSecret={this.state.encryptedSecret}
+             />
+    } else {
+      return <RawSecret
+              secretName={this.state.secretName}
+              rawSecret={this.state.rawSecret}
+              invalidSecret={this.state.invalidSecret}
+              inputChanged={this.inputChanged}
+              encrypt={this.encrypt}
+            />
+    }
   };
 }
 
@@ -45,7 +75,7 @@ class RawSecret extends Component {
   render() {
     let errorMessage;
     if (this.props.invalidSecret) {
-      errorMessage = <p class="help is-danger">Please provide some secrets, no need from all that secrecy if you don't have any!</p>;
+      errorMessage = <p className="help is-danger">Please provide some secrets, no need from all that secrecy if you don't have any!</p>;
     } else {
       errorMessage = '';
     }
