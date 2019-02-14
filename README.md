@@ -11,13 +11,16 @@ It's like [Muna](https://github.com/krasio/muna) but client side, using [keybase
 
 #### Public keys
 
-Recipients's public keys should be provided as json array in `/recipients.json` file in project root.
+Recipients's public keys should be provided in `src/recipients.js` file.
 
 Example:
 
 ```
-[
+var data = [
   "-----BEGIN PGP PUBLIC KEY BLOCK-----\nVersion: GnuPG v1\n\nmQENBF...v9x/\n-----END PGP PUBLIC KEY BLOCK-----\n",
   "-----BEGIN PGP PUBLIC KEY BLOCK-----\nVersion: GnuPG v1\n\eVTogBC...uhV/\n-----END PGP PUBLIC KEY BLOCK-----\n"
 ]
+module.exports = {gpgKeys: data};
 ```
+
+Also look at `src/recipients.js.example`.
