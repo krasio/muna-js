@@ -6,11 +6,12 @@ class App extends Component {
     super(props);
 
     this.inputChanged = this.inputChanged.bind(this);
-    this.fetchRecipients = this.fetchRecipients.bind(this);
+    this.importRecipientsPublicKeys = this.importRecipientsPublicKeys.bind(this);
     this.encrypt = this.encrypt.bind(this);
 
     this.recipients = [];
-    this.fetchRecipients();
+    var {gpgKeys} = require('./recipients');
+    this.importRecipientsPublicKeys(gpgKeys);
 
     this.state = {
       secretName: '',
@@ -25,20 +26,16 @@ class App extends Component {
     this.setState({[name]: event.target.value});
   }
 
-  fetchRecipients() {
-    fetch('/recipients.json')
-      .then(response => response.json())
-      .then(data => {
-        data.forEach(key => {
-          kbpgp.KeyManager.import_from_armored_pgp({armored: key}, (err, key) => {
-            if (!err) {
-              this.recipients.push(key);
-            } else {
-              console.log(err);
-            }
-          });
-        });
+  importRecipientsPublicKeys(data) {
+    data.forEach(key => {
+      kbpgp.KeyManager.import_from_armored_pgp({armored: key}, (err, key) => {
+        if (!err) {
+          this.recipients.push(key);
+        } else {
+          console.log(err);
+        }
       });
+    });
   }
 
   encrypt(event) {
