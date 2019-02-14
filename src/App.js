@@ -113,7 +113,7 @@ class RawSecret extends Component {
             <div className="field">
               <div className="control">
                 <button className="button is-primary" onClick={this.props.encrypt}>
-                  Keep it secret! Keept it safe!
+                  Keep it secret! Keep it safe!
                 </button>
               </div>
             </div>

@@ -1,4 +1,4 @@
-# MunaJS
+# Muna
 
 > 1. (verb) (-ia) to talk privately.
 > 2. (stative) be confidential, anonymous, secretly.
